@@ -6,105 +6,385 @@ option java_package = "com.pd.im.codec.proto.generated";
 option java_multiple_files = true;
 option java_outer_classname = "ImMessageProto";
 
+// ==================== 通用/基础模型 (Common) ====================
+
+// 用户资料快照（被其他业务 Pack 引用）
+message UserSnapshotPack {
+    string nick_name = 1;
+    string face_url = 2;
+    int32 gender = 3;
+}
+
+// ==================== 登录与会话 (Session/Login 9000系列) ====================
+
 // 用户登录
 message LoginPack {
-    string userId = 1;
+    string user_id = 1;
     string ticket = 2;
+    int32 heart_beat_time = 3;
 }
 
 // 登录响应
 message LoginAckPack {
-    string userId = 1;
+    string user_id = 1;
+    string session_token = 2;
 }
+
+// 快速登录
+message FastLoginPack {
+    string user_id = 1;
+    string session_token = 2;
+    int32 heart_beat_time = 3;
+}
+
+// ==================== 单聊消息相关 (P2P Messaging 1000系列) ====================
 
 // 消息体
 message ChatMessagePack {
-    string messageId = 1;
-    string fromId = 2;
-    string toId = 3;
-    string messageBody = 4;
-    int64 messageTime = 5;
-    int32 messageType = 6;
-    int32 appId = 7;
-    int32 clientType = 8;
+    string message_id = 1;
+    string from_id = 2;
+    string to_id = 3;
+    string message_body = 4;
+    int64 message_time = 5;
+    int32 message_type = 6;
+    int32 app_id = 7;
+    int32 client_type = 8;
     string imei = 9;
+    string extra = 10;
+    int64 message_key = 11;
+    int32 message_random = 12;
+    int64 message_sequence = 13;
 }
 
 // 消息确认
 message ChatMessageAck {
-    string messageId = 1;
-    int64 messageSequence = 2;
+    string message_id = 1;
+    int64 message_sequence = 2;
 }
 
-// 消息送达确认
+// 消息送达确认 (服务端处理)
 message MessageReceiveServerAckPack {
-    string messageId = 1;
-    int64 serverTime = 2;
+    int64 message_key = 1;
+    string from_id = 2;
+    string to_id = 3;
+    int64 message_sequence = 4;
+    bool server_send = 5;
+    int32 app_id = 6;
 }
 
 // 消息已读确认
 message MessageReadPack {
-    string fromId = 1;
-    string toId = 2;
-    int64 messageSequence = 3;
-    int32 appId = 4;
+    int64 message_sequence = 1;
+    string from_id = 2;
+    string to_id = 3;
+    string group_id = 4;
+    int32 conversation_type = 5;
+    int32 app_id = 6;
+    int32 client_type = 7;
+    string imei = 8;
 }
 
 // 撤回消息通知
 message RecallMessageNotifyPack {
-    string fromId = 1;
-    string toId = 2;
-    string messageId = 3;
-    int32 appId = 4;
+    string from_id = 1;
+    string to_id = 2;
+    int64 message_key = 3;
+    int64 message_sequence = 4;
+    int32 app_id = 5;
+    string imei = 6;
+    int32 conversation_type = 7;
+    int64 message_time = 8;
+    int64 sequence = 9;
+    int32 client_type = 10;
 }
 
-// 用户资料快照
-message UserSnapshotPack {
-    string nickName = 1;
-    string faceUrl = 2;
-    int32 gender = 3;
-}
+// ==================== 关系链相关 (Friendship 3000系列) ====================
 
-// 好友申请通知包（统一模型）
+// 好友申请通知
 message FriendRequestPack {
     int64 id = 1;
-    string fromId = 2;
-    string toId = 3;
-    string addSource = 4;
-    string addWording = 5;
-    int32 approveStatus = 6;
-    int64 createTime = 7;
-    int64 updateTime = 8;
+    string from_id = 2;
+    string to_id = 3;
+    string add_source = 4;
+    string add_wording = 5;
+    int32 approve_status = 6;
+    int64 create_time = 7;
+    int64 update_time = 8;
     int64 sequence = 9;
-    UserSnapshotPack userProfile = 10;
+    UserSnapshotPack user_profile = 10;
 }
 
-
-// 好友信息通知 (对应 3000)
+// 好友信息同步/更新 (新增/修改)
 message FriendInfoPack {
-    int32 appId = 1;
-    string fromId = 2;
-    string toId = 3;
+    int32 app_id = 1;
+    string from_id = 2;
+    string to_id = 3;
     string remark = 4;
     int32 status = 5;
     int32 black = 6;
-    int64 createTime = 7;
-    int64 friendSequence = 8;
-    int64 blackSequence = 9;
-    string addSource = 10;
+    int64 create_time = 7;
+    int64 friend_sequence = 8;
+    int64 black_sequence = 9;
+    string add_source = 10;
     string extra = 11;
-    UserSnapshotPack userProfile = 12;
+    UserSnapshotPack user_profile = 12;
 }
 
-// 删除好友通知 (对应 3002)
+// 更新好友资料通知
+message UpdateFriendPack {
+    string from_id = 1;
+    string to_id = 2;
+    string remark = 3;
+    int64 sequence = 4;
+}
+
+// 删除好友通知
 message DeleteFriendPack {
-    string fromId = 1;
-    string toId = 2;
+    string from_id = 1;
+    string to_id = 2;
     int64 sequence = 3;
 }
 
 // 已读所有好友申请通知
 message ReadAllFriendRequestPack {
-    string fromId = 1;
+    string from_id = 1;
     int64 sequence = 2;
+}
+
+// 添加黑名单通知
+message AddFriendBlackPack {
+    string from_id = 1;
+    string to_id = 2;
+    int64 sequence = 3;
+}
+
+// 移除黑名单通知
+message DeleteBlackPack {
+    string from_id = 1;
+    string to_id = 2;
+    int64 sequence = 3;
+}
+
+// 删除所有好友通知
+message DeleteAllFriendPack {
+    string from_id = 1;
+}
+
+// 添加好友分组通知
+message AddFriendGroupPack {
+    string from_id = 1;
+    string group_name = 2;
+    int64 sequence = 3;
+}
+
+// 删除好友分组通知
+message DeleteFriendGroupPack {
+    string from_id = 1;
+    string group_name = 2;
+    int64 sequence = 3;
+}
+
+// 添加好友分组成员通知
+message AddFriendGroupMemberPack {
+    string from_id = 1;
+    string group_name = 2;
+    repeated string to_ids = 3;
+    int64 sequence = 4;
+}
+
+// 删除好友分组成员通知
+message DeleteFriendGroupMemberPack {
+    string from_id = 1;
+    string group_name = 2;
+    repeated string to_ids = 3;
+    int64 sequence = 4;
+}
+
+// ==================== 群组相关 (Group 2000系列) ====================
+
+// 创建群组通知
+message CreateGroupPack {
+    string group_id = 1;
+    int32 app_id = 2;
+    string owner_id = 3;
+    int32 group_type = 4;
+    string group_name = 5;
+    int32 mute = 6;
+    int32 apply_join_type = 7;
+    int32 private_chat = 8;
+    string introduction = 9;
+    string notification = 10;
+    string face_url = 11;
+    int32 status = 12;
+    int64 sequence = 13;
+    int64 create_time = 14;
+    string extra = 15;
+}
+
+// 解散群组通知
+message DestroyGroupPack {
+    string group_id = 1;
+    int64 sequence = 2;
+}
+
+// 加入群组通知 (新增成员)
+message AddGroupMemberPack {
+    string group_id = 1;
+    repeated string members = 2;
+}
+
+// 踢出群成员通知
+message RemoveGroupMemberPack {
+    string group_id = 1;
+    string member = 2;
+}
+
+// 修改群资料通知
+message UpdateGroupInfoPack {
+    string group_id = 1;
+    string group_name = 2;
+    int32 mute = 3;
+    int32 join_type = 4;
+    string introduction = 5;
+    string notification = 6;
+    string face_url = 7;
+    int32 max_member_count = 8;
+    int64 sequence = 9;
+}
+
+// 修改群成员个性化资料通知
+message UpdateGroupMemberPack {
+    string group_id = 1;
+    string member_id = 2;
+    string alias = 3;
+    int32 role = 4;
+    string extra = 5;
+}
+
+// 移交群主通知
+message TransferGroupPack {
+    string group_id = 1;
+    string owner_id = 2;
+}
+
+// 群组全员禁言通知
+message MuteGroupPack {
+    string group_id = 1;
+    int32 mute = 2;
+}
+
+// 针对单个群成员的禁言通知
+message GroupMemberMutePack {
+    string group_id = 1;
+    string member_id = 2;
+    int64 mute_time = 3;
+}
+
+// 群聊消息包装 (包含基础 P2P 消息体)
+message GroupMessagePack {
+    ChatMessagePack chat_message = 1;
+}
+
+// ==================== 用户相关 (User 4000系列) ====================
+
+// 修改用户资料通知
+message UserModifyPack {
+    string user_id = 1;
+    string nick_name = 2;
+    string password = 3;
+    string face_url = 4;
+    int32 gender = 5;
+    string self_signature = 6;
+    int32 allow_type = 7;
+    string birth_day = 8;
+    string extra = 9;
+}
+
+// 用户在线状态变更通知
+message UserStatusChangeNotifyPack {
+    int32 app_id = 1;
+    string user_id = 2;
+    int32 status = 3;
+}
+
+// 用户自定义状态变更通知
+message UserCustomStatusChangeNotifyPack {
+    string user_id = 1;
+    int32 custom_status = 2;
+    string custom_text = 3;
+}
+
+// ==================== 会话相关 (Conversation 5000系列) ====================
+
+// 删除会话通知
+message DeleteConversationPack {
+    string conversation_id = 1;
+}
+
+// 更新会话通知
+message UpdateConversationPack {
+    string conversation_id = 1;
+    int32 is_top = 2;
+    int32 is_mute = 3;
+    int64 sequence = 4;
+    int32 conversation_type = 5;
+}
+
+// 离线消息内容
+message OfflineMessagePack {
+    int64 message_key = 1;
+    string message_body = 2;
+    int64 message_time = 3;
+    string extra = 4;
+    int32 del_flag = 5;
+    string from_id = 6;
+    string to_id = 7;
+    int64 message_sequence = 8;
+    int32 message_random = 9;
+    int32 conversation_type = 10;
+    string conversation_id = 11;
+}
+
+// 增量同步请求
+message SyncRequest {
+    int64 last_sequence = 1;
+    int32 max_limit = 2;
+    int32 app_id = 3;
+    string operator = 4;
+}
+
+// 增量同步响应
+message SyncResponse {
+    int64 max_sequence = 1;
+    bool is_completed = 2;
+    repeated OfflineMessagePack data_list = 3;
+}
+
+// 通用响应包 (用于 ACK 或 错误通知)
+message ResponsePack {
+    int32 code = 1;
+    string message = 2;
+    bytes payload = 3;
+}
+
+// ==================== 协议内部结构 (Internal Infrastructure) ====================
+
+// 序列化策略枚举
+enum SerializationType {
+    JSON = 0;
+    PROTOBUF = 1;
+}
+
+// 内部传输信封包 (用于 MQ 及 RPC 通讯)
+message InternalPacket {
+    int32 app_id = 1;
+    int32 command = 2;
+    int32 client_type = 3;
+    string imei = 4;
+    int32 version = 5;
+    SerializationType serialize_type = 6;
+    string user_id = 7; // 目标用户/设备主权用户 (用于路由与上下文标识)
+    string message_id = 8; // 消息唯一标识 (用于追踪和去重)
+    int64 timestamp = 9; // 消息产生时间戳
+    bytes payload = 10;
 }
